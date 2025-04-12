@@ -134,10 +134,10 @@ def authenticate_user(username: str, password: str):
         user_tokens_correlation = {}
     if username not in user_tokens_correlation:
         user_tokens_correlation[username] = {}
-
     user_tokens_correlation[username][token] = {
         "created_at": f"{current_datetime.year}-{current_datetime.month}-{current_datetime.day}-{current_datetime.hour}-{current_datetime.minute}-{current_datetime.second}"
     }
+    write_file(USER_TOKENS_CORRELATION_FILE, user_tokens_correlation)
 
     return (True, token)
 
