@@ -96,9 +96,9 @@ def update_user_data(username: str, first_name: str, last_name: str, email: str)
         return (False, "User does not exists.")
 
     user = read_file(USERS_BASE_DIR + username + ".json")
-    user["first_name"] = user["first_name"] or first_name
-    user["last_name"] = user["last_name"] or last_name
-    user["email"] = user["email"] or email
+    user["first_name"] = first_name if first_name else user["first_name"]
+    user["last_name"] = last_name if last_name else user["last_name"]
+    user["email"] = email if email else user["email"]
     write_file(user_file_name, user)
     return (True, "User data updated with SUCCESS!")
 
@@ -135,7 +135,7 @@ def authenticate_user(username: str, password: str):
     if username not in user_tokens_correlation:
         user_tokens_correlation[username] = {}
     user_tokens_correlation[username][token] = {
-        "created_at": f"{current_datetime.year}-{current_datetime.month}-{current_datetime.day}-{current_datetime.hour}-{current_datetime.minute}-{current_datetime.second}"
+        "created_at": current_datetime.isoformat()
     }
     write_file(USER_TOKENS_CORRELATION_FILE, user_tokens_correlation)
 
@@ -160,6 +160,21 @@ def redefine_user_password(username: str, current_password: str, new_password: s
 
 # resetar senha de usuario
 # validar se token existe ou se ainda é valido
+def is_token_valid(token: str):
+    tokens = read_file(TOKENS_FILE) or {}
+    user_tokens = read_file(USER_TOKENS_CORRELATION_FILE) or {}
+
+    for user, tokens_map in user_tokens.items():
+        if token in tokens_map:
+            created_at_str = tokens_map[token]["created_at"]
+            created_at = datetime.datetime.fromisoformat(created_at_str)
+            now = datetime.datetime.now()
+            age = (now - created_at).total_seconds()
+            return age < TOKENS_TTL
+
+    return False
+
+
 # remover usuario
 
 # criar grupo
