@@ -17,6 +17,7 @@ GROUPS_FILE = os.path.join(BASE_DIR, "groups/")
 TOKENS_FILE = os.path.join(BASE_DIR, "auth_tokens.json")
 # TTL para os tokens (86400s == 1 dia)
 TOKENS_TTL = 86400
+USER_TOKENS_CORRELATION_FILE = os.path.join(BASE_DIR, "user_tokens_correlation.json")
 
 
 # "banco de dados"
@@ -122,11 +123,22 @@ def authenticate_user(username: str, password: str):
     if not tokens:
         tokens = {}
 
+    # create token and associate username
     tokens[token] = {
         "username": username,
-        "created_at": f"{current_datetime.year}-{current_datetime.month}-{current_datetime.day}-{current_datetime.hour}-{current_datetime.min}-{current_datetime.second}",
     }
     write_file(TOKENS_FILE, tokens)
+
+    # create user and token correlation and setting the created time of the token
+    user_tokens_correlation = read_file(USER_TOKENS_CORRELATION_FILE)
+    if not user_tokens_correlation:
+        user_tokens_correlation = {}
+    if username not in user_tokens_correlation:
+        user_tokens_correlation[username] = {}
+
+    user_tokens_correlation[username][token] = {
+        "created_at": f"{current_datetime.year}-{current_datetime.month}-{current_datetime.day}-{current_datetime.hour}-{current_datetime.minute}-{current_datetime.second}"
+    }
 
     return (True, token)
 
@@ -148,7 +160,7 @@ def redefine_user_password(username: str, current_password: str, new_password: s
 
 
 # resetar senha de usuario
-
+# validar se token existe ou se ainda é valido
 # remover usuario
 
 # criar grupo
@@ -157,17 +169,18 @@ def redefine_user_password(username: str, current_password: str, new_password: s
 # listar usuarios de grupo
 # remover grupo
 
+
 # testes
 # create user
-print(
-    create_user(
-        "default_username",
-        "default_first_name",
-        "default_last_name",
-        "default_email",
-        "default_password",
-    )
-)
+# print(
+#    create_user(
+#        "default_username",
+#        "default_first_name",
+#        "default_last_name",
+#        "default_email",
+#        "default_password",
+#    )
+# )
 # list users
 # print(list_users())
 # update user data
@@ -185,4 +198,4 @@ print(
 # create token
 # print(authenticate_user("default_username", "default_password"))
 # update user password
-redefine_user_password("default_username", "default_password", "default_password_1")
+# redefine_user_password("default_username", "default_password", "default_password_1")
