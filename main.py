@@ -132,7 +132,23 @@ def authenticate_user(username: str, password: str):
 
 
 # atualizar senha de usuario
+def redefine_user_password(username: str, current_password: str, new_password: str):
+    user_file_name = USERS_BASE_DIR + username + ".json"
+
+    if not os.path.exists(user_file_name):
+        return (False, "User does not exists.")
+
+    user = read_file(USERS_BASE_DIR + username + ".json")
+    if not calculate_sha256(current_password) == user["password"]:
+        return (False, "Incorrect password.")
+
+    user["password"] = calculate_sha256(new_password)
+    write_file(user_file_name, user)
+    return (True, "User password updated with SUCCESS!")
+
+
 # resetar senha de usuario
+
 # remover usuario
 
 # criar grupo
@@ -167,4 +183,6 @@ print(
 # delete_user("default_username")
 # print(list_users())
 # create token
-print(authenticate_user("default_username", "default_password"))
+# print(authenticate_user("default_username", "default_password"))
+# update user password
+redefine_user_password("default_username", "default_password", "default_password_1")
